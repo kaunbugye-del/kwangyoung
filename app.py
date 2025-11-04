@@ -10,8 +10,6 @@ from streamlit_folium import st_folium
 st.set_page_config(page_title="광영고 주변 음식점 지도", layout="wide")
 
 st.sidebar.title("⚙️ 지도 설정")
-# theme = st.sidebar.radio("🗺️ 지도 테마 선택", ["기본", "화이트 테마", "블랙 테마"])
-# tile_style = "OpenStreetMap" if theme == "기본" else "CartoDB positron" if theme == "화이트 테마" else "CartoDB dark_matter"
 tile_style = "OpenStreetMap"
 
 category = st.sidebar.selectbox("🍴 음식 종류 선택", ["전체", "식사", "간식", "기타"])
@@ -27,7 +25,7 @@ places = [
     {"name": "쥬씨", "info": "블루베리 8, 토마토 8, 초코 바나나 20, 수박 11", "lat": 37.53930076924933, "lon": 126.82670235565537, "category": "간식"},
     {"name": "메가커피", "info": "딸기라떼 7, 아이스초코 17", "lat": 37.5395476, "lon": 126.8336208, "category": "간식"},
     {"name": "뚜레쥬르", "info": "식빵 14", "lat": 37.5294857, "lon": 126.8330209, "category": "간식"},
-    {"name": "파리바게트", "info": "꽈배기 9", "lat": 37.522121, "lon": 126.8333182, "category": "간식"},
+    {"name": "파리바게트", "info": "꽈배기 9, 크림빵 30", "lat": 37.522121, "lon": 126.8333182, "category": "간식"},
     {"name": "복호두", "info": "호두과자 9", "lat": 37.5411, "lon": 126.83764, "category": "간식"},
     {"name": "커피에반하다", "info": "초코라떼 16", "lat": 37.5370904, "lon": 126.8271904, "category": "간식"},
     {"name": "이디야", "info": "초코라떼", "lat": 37.535, "lon": 126.833, "category": "간식"},
@@ -37,7 +35,9 @@ places = [
     {"name": "토마토김밥", "info": "토마토김밥 20", "lat": 37.5406091, "lon": 126.837202, "category": "식사"},
     {"name": "맥도날드", "info": "불고기 30", "lat": 37.5314392, "lon": 126.8309681, "category": "식사"},
     {"name": "크림빵", "info": "30", "lat": 37.535, "lon": 126.833, "category": "간식"},
-    {"name": "버거킹", "info": "와퍼 30", "lat": 37.5391241, "lon": 126.8292262, "category": "식사"}
+    {"name": "버거킹", "info": "와퍼 30", "lat": 37.5391241, "lon": 126.8292262, "category": "식사"},
+    {"name": "프랭크버거", "info": "프랭크버거 30", "lat": 37.5427007, "lon": 126.8443152, "category": "식사"},
+    {"name": "김밥세상", "info": "떡볶이 23", "lat": 37.5390595, "lon": 126.8268677, "category": "간식"}
 ]
 
 center_lat, center_lon = 37.53758714716197, 126.82327111433354
@@ -52,16 +52,16 @@ if searched_place:
     zoom_level = 17
 
 m = folium.Map(location=map_center, zoom_start=zoom_level, tiles=tile_style)
-color_map = {"식사": "green", "간식": "purple", "기타": "blue"}
+color_map = {"식사": "green", "간식": "pink", "기타": "blue"}
 
 for place in places:
     if category != "전체" and place["category"] != category:
         continue
 
     popup_html = f"""
-    <div style="font-family:sans-serif; text-align:left; padding:5px; width:220px;">
-        <h4 style="margin-bottom:5px; color:#333;">{place['name']}</h4>
-        <p style="font-size:13px; margin:0; color:#555;">🍽️ {place['category']}</p>
+    <div style="font-family:sans-serif; text-align:left; padding:5px; width:220px; color:#000;">
+        <h4 style="margin-bottom:5px;">{place['name']}</h4>
+        <p style="font-size:13px; margin:0;">🍽️ {place['category']}</p>
         <p style="font-size:12px; margin:4px 0;">{place['info']}</p>
     </div>
     """
@@ -74,8 +74,20 @@ for place in places:
     )
     marker.add_to(m)
 
+# 제목
 st.markdown(
-    "<h1 style='text-align:center; font-size:38px; font-weight:600; margin-bottom:15px;'>📍 광영고 주변 음식점 지도</h1>",
+    "<h1 style='text-align:center; font-size:38px; font-weight:600; margin-bottom:10px; color:#fff;'>📍 광영고 주변 음식점 지도</h1>",
     unsafe_allow_html=True
 )
+
+# 제목 아래에 범례
+st.markdown(
+    """
+    <div style='text-align:center; font-size:16px; margin-bottom:20px; color:#fff;'>
+        🟩 식사&nbsp;&nbsp;&nbsp;🟪 간식&nbsp;&nbsp;&nbsp;🟦 기타
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
 st_folium(m, width=1000, height=600, returned_objects=[])
