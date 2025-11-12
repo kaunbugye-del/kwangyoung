@@ -7,7 +7,8 @@ import streamlit as st
 import folium
 from streamlit_folium import st_folium
 
-st.set_page_config(page_title="광영고 주변 음식점 지도", layout="wide")
+# 페이지 제목 수정
+st.set_page_config(page_title="광영고 주변 음식점 당도 분석 지도", layout="wide")
 
 st.sidebar.title("⚙️ 지도 설정")
 tile_style = "OpenStreetMap"
@@ -15,6 +16,25 @@ tile_style = "OpenStreetMap"
 category = st.sidebar.selectbox("🍴 음식 종류 선택", ["전체", "식사", "간식", "기타"])
 zoom_level = st.sidebar.slider("🔍 지도 확대/축소", 15, 18, 15)
 search_query = st.sidebar.text_input("🔍 음식점 이름 검색", placeholder="예: 쥬씨")
+
+# 당도 숫자 자동 변환 함수
+def convert_sugar(info):
+    parts = info.split(",")
+    converted = []
+    for p in parts:
+        p = p.strip()
+        if " " in p:
+            item, num = p.rsplit(" ", 1)
+            if num.isdigit():
+                converted.append(f"{item} 당도:{num}")
+            else:
+                converted.append(p)
+        else:
+            if p.isdigit():
+                converted.append(f"당도:{p}")
+            else:
+                converted.append(p)
+    return ", ".join(converted)
 
 places = [
     {"name": "금화왕 돈까스", "info": "돈까스 소스 16, 샐러드 12.5, 딸기잼 30", "lat": 37.53976476914723, "lon": 126.83216235565537, "category": "식사"},
@@ -40,6 +60,10 @@ places = [
     {"name": "김밥세상", "info": "떡볶이 23", "lat": 37.5390595, "lon": 126.8268677, "category": "간식"}
 ]
 
+# info 업데이트
+for p in places:
+    p["info"] = convert_sugar(p["info"])
+
 center_lat, center_lon = 37.53758714716197, 126.82327111433354
 searched_place = None
 for place in places:
@@ -53,11 +77,26 @@ if searched_place:
 
 m = folium.Map(location=map_center, zoom_start=zoom_level, tiles=tile_style)
 
-color_map = {"식사": "green", "간식": "purple", "기타": "blue"}
+# 마커 색: 15 이상 빨강, 미만 파랑
+def sugar_color(info):
+    nums = []
+    for part in info.split(","):
+        t = part.strip().split("당도:")
+        if len(t) == 2:
+            try:
+                nums.append(float(t[1]))
+            except:
+                pass
+    if not nums:
+        return "blue"
+    max_sugar = max(nums)
+    return "red" if max_sugar >= 15 else "blue"
 
 for place in places:
     if category != "전체" and place["category"] != category:
         continue
+
+    marker_color = sugar_color(place["info"])
 
     popup_html = f"""
     <div style="font-family:sans-serif; text-align:left; padding:5px; width:220px; color:#000;">
@@ -66,24 +105,25 @@ for place in places:
         <p style="font-size:12px; margin:4px 0;">{place['info']}</p>
     </div>
     """
-    icon_color = color_map.get(place["category"], "blue")
-    marker = folium.Marker(
+
+    folium.Marker(
         location=[place["lat"], place["lon"]],
         popup=folium.Popup(popup_html, max_width=250),
         tooltip=place["name"],
-        icon=folium.Icon(color=icon_color, icon="info-sign")
-    )
-    marker.add_to(m)
+        icon=folium.Icon(color=marker_color, icon="info-sign")
+    ).add_to(m)
 
+# 제목 업데이트 (지도 위 표시)
 st.markdown(
-    "<h1 style='text-align:center; font-size:38px; font-weight:600; margin-bottom:10px; color:#fff;'>📍 광영고 주변 음식점 지도</h1>",
+    "<h1 style='text-align:center; font-size:38px; font-weight:600; margin-bottom:10px; color:#fff;'>📍 광영고 주변 음식점 당도 분석 지도</h1>",
     unsafe_allow_html=True
 )
 
+# 범례 (저당=파랑 / 고당=빨강)
 st.markdown(
     """
     <div style='text-align:center; font-size:16px; margin-bottom:20px; color:#fff;'>
-        🟩 식사&nbsp;&nbsp;&nbsp;🟪 간식&nbsp;&nbsp;&nbsp;🟦 기타
+        🔵 저당&nbsp;&nbsp;&nbsp;🔴 고당
     </div>
     """,
     unsafe_allow_html=True
