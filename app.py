@@ -77,7 +77,7 @@ if searched_place:
 
 m = folium.Map(location=map_center, zoom_start=zoom_level, tiles=tile_style)
 
-# 마커 색: 15 이상 빨강, 미만 파랑
+# 마커 색: 12 이상 빨강, 미만 파랑
 def sugar_color(info):
     nums = []
     for part in info.split(","):
@@ -90,7 +90,7 @@ def sugar_color(info):
     if not nums:
         return "blue"
     max_sugar = max(nums)
-    return "red" if max_sugar >= 15 else "blue"
+    return "red" if max_sugar >= 12 else "blue"
 
 for place in places:
     if category != "전체" and place["category"] != category:
