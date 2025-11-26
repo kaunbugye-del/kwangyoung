@@ -115,14 +115,14 @@ for place in places:
 
 # 제목 업데이트 (지도 위 표시)
 st.markdown(
-    "<h1 style='text-align:center; font-size:38px; font-weight:600; margin-bottom:10px; color:#fff;'>📍 광영고 주변 음식점 당도 분석 지도</h1>",
+    "<h1 style='text-align:center; font-size:38px; font-weight:600; margin-bottom:10px; color:#000;'>📍 광영고 주변 음식점 당도 분석 지도</h1>",
     unsafe_allow_html=True
 )
 
 # 범례 (저당=파랑 / 고당=빨강)
 st.markdown(
     """
-    <div style='text-align:center; font-size:16px; margin-bottom:20px; color:#fff;'>
+    <div style='text-align:center; font-size:16px; margin-bottom:20px; color:#000;'>
         🔵 저당&nbsp;&nbsp;&nbsp;🔴 고당
     </div>
     """,
@@ -130,3 +130,4 @@ st.markdown(
 )
 
 st_folium(m, width=1000, height=600, returned_objects=[])
+
